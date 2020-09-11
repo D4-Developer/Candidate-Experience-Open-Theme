@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "250194551746",
+    "firebase_url": "https://recruit-a-thon-6dfb6.firebaseio.com",
+    "project_id": "recruit-a-thon-6dfb6",
+    "storage_bucket": "recruit-a-thon-6dfb6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:250194551746:android:9b7f96de536d307ce1ec5b",
+        "android_client_info": {
+          "package_name": "Recruit_a_thon.HackerEarth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "250194551746-k1588djkrmaffrglk9hvudi92ifv09jf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdxvU0LmcBEcga5NJszzGoYq4ix_6R4Go"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "250194551746-k1588djkrmaffrglk9hvudi92ifv09jf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
