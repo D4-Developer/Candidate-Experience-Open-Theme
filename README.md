@@ -18,11 +18,11 @@ CandidateOpenTheme App : The simple app for recruitment based on the Resume Rank
 1. Manager Flow:
 
 
-          ![Manager Flow](https://drive.google.com/file/d/1K5jV0eCd8V5aKrSzA-KORTwMoZB0SzhR)
+          ![Manager Flow] (https://drive.google.com/uc?export=view&id=1K5jV0eCd8V5aKrSzA-KORTwMoZB0SzhR)
 
 
 2. Candidate Flow:
 
 
-          ![Candidate Flow](https://drive.google.com/file/d/1d5EOuJ60bJrpxjpP1C5-OqpTSPELj_T4)
+          ![Candidate Flow] (https://drive.google.com/uc?export=view&id=1d5EOuJ60bJrpxjpP1C5-OqpTSPELj_T4)
 
