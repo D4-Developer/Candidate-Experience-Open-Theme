@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,7 +19,6 @@ class homeCandidate extends StatefulWidget {
   homeCandidate(var u, FirebaseAuth _auth) {
     userData = u;
     auth = _auth;
-    print(userData);
   }
 
   @override
@@ -45,8 +45,36 @@ class _homeC extends State<homeCandidate> {
   @override
   Widget build(BuildContext context0) {
     return Scaffold(
-      body: SafeArea(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      body: WillPopScope(
+        onWillPop: () async{
+          showDialog(context: context,
+              child: AlertDialog(
+                title: Text("Are you sure to Log out from the app?"),
+                actions: <Widget>[
+                  RaisedButton(
+                    shape: StadiumBorder(),
+                    child: Text(" No "),
+                    color: Colors.red[800],
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  RaisedButton(
+                    shape: StadiumBorder(),
+                    child: Text(" Yes "),
+                    color: Colors.blue[800],
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              )
+          );
+          return false;
+        },
+        child: SafeArea(
+          child: _widgetOptions.elementAt(_selectedIndex)
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -56,7 +84,7 @@ class _homeC extends State<homeCandidate> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
-            title: Text('TestPage',style: TextStyle(fontSize: 15)),
+            title: Text('Aptitude Test',style: TextStyle(fontSize: 15)),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -79,62 +107,24 @@ class Personality extends StatefulWidget {
 }
 
 class _PersonalityState extends State<Personality> {
+
   @override
   Widget build (BuildContext context) {
-    if (!userData['isGivenPersonality']) {
-      return Center(
-        child: RaisedButton(
-          child: Text("Start Personality Test"),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(
-                builder: (context) => PersonalityTest(userData)));
-          },
-        ),
-      );
-    }
-    else {
-      var openness = userData['PersonalityResult']['openness'] * 100 / 30,
-          conscientiouness = userData['PersonalityResult']['conscientiousness'] *
-              100 / 30,
-          extraversion = userData['PersonalityResult']['extraversion'] * 100 /
-              30,
-          agreeableness = userData['PersonalityResult']['agreeableness'] * 100 /
-              30,
-          neuroticism = userData['PersonalityResult']['neuroticism'] * 100 / 30;
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Personality Test'),
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.blue[900],
-        ),
-        body: ListWheelScrollView(
-          itemExtent: 70,
-          children: <Widget>[
-            ListTile(
-              title: Text('openness'),
-              subtitle: Text('$openness'),
-
-            ),
-            ListTile(
-              title: Text('conscientiouness'),
-              subtitle: Text('$conscientiouness'),
-            ),
-            ListTile(
-              title: Text('extraversion'),
-              subtitle: Text('$extraversion'),
-            ),
-            ListTile(
-              title: Text('agreeableness'),
-              subtitle: Text('$agreeableness'),
-            ),
-            ListTile(
-              title: Text('neuroticism'),
-              subtitle: Text('$neuroticism'),
-            )
-          ],
-        ),
-      );
-    }
+    print(userData['isGivenPersonality']);
+    return FutureBuilder(
+      future: Firestore.instance.collection('candidates').document(userData['UID']).get(),
+      builder: (context, AsyncSnapshot<DocumentSnapshot> ds){
+        if(ds.connectionState == ConnectionState.waiting)
+          return PersonalityTest(userData);
+        else if(ds.connectionState == ConnectionState.done){
+//          var u = ds.data.data;
+//          print(u);
+          userData = ds.data.data;
+          return PersonalityTest(userData);
+        }
+        return PersonalityTest(userData);
+      },
+    );
   }
 }
 
@@ -202,84 +192,192 @@ class _testPageState extends State<testPage> {
       }
     });
 
-  }// progressIndicator
+  }// pro
+  ValueNotifier vs = ValueNotifier(userData);// gressIndicator
 
   @override
   Widget build(BuildContext context) {
-    if(userData['isGivenTest'] || userData['isStarted'])
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("Aptitude Test"),
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.blue[900],
-        ),
-        body: Card(
-          color: Colors.cyan[100],
-          child: ListView(
-            children: <Widget>[
-              ListTile(
-                title: Text("You Already Given The Test")
+//    StreamBuilder(
+//      stream: Firestore.instance.collection('candidates').document(userData['UID']).snapshots(),
+//      builder: (context, AsyncSnapshot<DocumentSnapshot> ds){
+//        if(ds.connectionState == ConnectionState.waiting)
+//          return Container();
+//        else if(ds.connectionState == ConnectionState.done){
+////          var u = ds.data.data;
+////          print(u);
+//          userData = ds.data.data;
+//          print(ds.data.data);
+//          vs.value = ds.data.data;
+//          return Container();
+//        }
+//        return Container();
+//      },
+//    );
+
+    Stream<DocumentSnapshot> sds = Firestore.instance.collection('candidates').document(userData['UID']).snapshots();
+    sds.listen((event) {
+      userData = event.data;
+      if(userData != event.data)
+        setState(() {
+          vs.value = event.data;
+        });
+      vs.value = event.data;
+    });
+    return checkStatus();
+//    if(userData['isGivenTest'] || userData['isStarted'])
+//      return Scaffold(
+//        appBar: AppBar(
+//          title: Text("Aptitude Test"),
+//          automaticallyImplyLeading: false,
+//          backgroundColor: Colors.blue[900],
+//        ),
+//        body: Card(
+//          color: Colors.cyan[100],
+//          child: ListView(
+//            children: <Widget>[
+//              ListTile(
+//                title: Text("You Already Given The Test")
+//              ),
+//              ListTile(
+//                title: Text("Result = ${userData['TestResult']}")
+//              ),
+//              RaisedButton(
+//                color: Colors.cyan[300],
+//                child: Text("Tap To See The Analysis Of Your Test"),
+//                onPressed: progressIndicator
+//              )
+//            ],
+//          ),
+//        ),
+//      );
+//    else if(userData['isStarted'] == false)
+//      return Scaffold(
+//        appBar: AppBar(
+//          automaticallyImplyLeading: false,
+//          title: Text('Aptitude Test Page'),
+//          backgroundColor: Colors.blue[900],
+//        ),
+//        body: Card(
+//          child: Column(
+//            mainAxisAlignment: MainAxisAlignment.center,
+//            children: <Widget>[
+//              Container(
+//                padding: EdgeInsets.all(20),
+//                child: Text('You have not given the Aptitude test.\nTo start the test first read the rules and then press below button.')
+//              ),
+//              ListTile(
+//                title: Text('Rules :'),
+//                subtitle :Text('The Test will contain 25 question.\nEach have 1 mark.'
+//                   '\nYou can give the test only 1 time.\nYou have 30 minutes to complete it.'
+//                ),
+//              ),
+//              Padding(padding: EdgeInsets.all(20)),
+//              RaisedButton(
+//                color: Colors.blue[900],
+//                textColor: Colors.blue[100],
+//                shape: StadiumBorder(),
+//                child: Text('START APTITUDE TEST'),
+//                onPressed: () async{
+//                  DocumentReference dr = Firestore.instance.collection('appData').document('TestResult');
+//                  var data = {
+//                    'appData' : dr,
+//                    'TestResult': 0,
+//                    'isStarted': true,
+//                  };
+//                  Navigator.push(context, MaterialPageRoute(builder: (context)=> AptitudeTest(auth, userData)));
+//                  userData['isStarted'] = true;
+//                  userData['TestResult'] = 0;
+//                  userData['appData'] = dr;
+//                  await Firestore.instance.collection('candidates').document(userData['UID']).updateData(data);
+//                },
+//              )
+//            ],
+//          ),
+//        ),
+//      );
+  }
+
+  checkStatus(){
+    return ValueListenableBuilder(
+      valueListenable: vs,
+      builder: (BuildContext, newData, child){
+        if(newData['isGivenTest'] || newData['isStarted'])
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Aptitude Test"),
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.blue[900],
+            ),
+            body: Card(
+              color: Colors.cyan[100],
+              child: ListView(
+                children: <Widget>[
+                  ListTile(
+                      title: Text("You Already Given The Test")
+                  ),
+                  ListTile(
+                      title: Text("Result = ${userData['TestResult']}")
+                  ),
+                  RaisedButton(
+                      color: Colors.cyan[300],
+                      child: Text("Tap To See The Analysis Of Your Test"),
+                      onPressed: progressIndicator
+                  )
+                ],
               ),
-              ListTile(
-                title: Text("Result = ${userData['TestResult']}")
+            ),
+          );
+        else if(newData['isStarted'] == false)
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              title: Text('Aptitude Test Page'),
+              backgroundColor: Colors.blue[900],
+            ),
+            body: Card(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                      padding: EdgeInsets.all(20),
+                      child: Text('You have not given the Aptitude test.\nTo start the test first read the rules and then press below button.')
+                  ),
+                  ListTile(
+                    title: Text('Rules :'),
+                    subtitle :Text('The Test will contain 25 question.\nEach have 1 mark.'
+                        '\nYou can give the test only 1 time.\nYou have 30 minutes to complete it.'
+                    ),
+                  ),
+                  Padding(padding: EdgeInsets.all(20)),
+                  RaisedButton(
+                    color: Colors.blue[900],
+                    textColor: Colors.blue[100],
+                    shape: StadiumBorder(),
+                    child: Text('START APTITUDE TEST'),
+                    onPressed: () async{
+                      var data = {
+                        'TestResult': 0,
+                        'isStarted': true,
+                      };
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> AptitudeTest(auth, userData)));
+                      userData['isStarted'] = true;
+                      userData['TestResult'] = 0;
+                      await Firestore.instance.collection('candidates').document(userData['UID']).updateData(data);
+                    },
+                  )
+                ],
               ),
-              RaisedButton(
-                color: Colors.cyan[300],
-                child: Text("Tap To See The Analysis Of Your Test"),
-                onPressed: progressIndicator
-              )
-            ],
-          ),
-        ),
-      );
-    else if(userData['isStarted'] == false)
-      return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text('Aptitude Test Page'),
-          backgroundColor: Colors.blue[900],
-        ),
-        body: Card(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(20),
-                child: Text('You have not given the Aptitude test.\nTo start the test first read the rules and then press below button.')
-              ),
-              ListTile(
-                title: Text('Rules :'),
-                subtitle :Text('The Test will contain 25 question.\nEach have 1 mark.'
-                   '\nYou can give the test only 1 time.\nYou have 30 minutes to complete it.'
-                ),
-              ),
-              Padding(padding: EdgeInsets.all(20)),
-              RaisedButton(
-                color: Colors.blue[900],
-                textColor: Colors.blue[100],
-                shape: StadiumBorder(),
-                child: Text('START APTITUDE TEST'),
-                onPressed: () async{
-                  DocumentReference dr = Firestore.instance.collection('appData').document('TestResult');
-                  var data = {
-                    'appData' : dr,
-                    'TestResult': 0,
-                    'isStarted': true,
-                  };
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=> AptitudeTest(auth, userData)));
-                  userData['isStarted'] = true;
-                  userData['TestResult'] = 0;
-                  userData['appData'] = dr;
-                  await Firestore.instance.collection('candidates').document(userData['UID']).updateData(data);
-                },
-              )
-            ],
-          ),
-        ),
-      );
+            ),
+          // ignore: missing_return, missing_return
+          );
+        print("Something went wrong");
+          return Container();
+      }
+    );
   }
 }
 
+/*
 class MyProfile extends StatefulWidget {
 
   @override
@@ -367,6 +465,7 @@ class _tabs_P extends State<tabBar_P> {
     temp['stream'] = temp['stream'] == null ? null: temp['stream'];
     temp['experience'] = temp['experience'] == null ? null : temp['experience'];
 
+*/
 /*
     temp['choice'] = userData['Details'][0] == null ? null: userData['Details'][0];
     temp['qualification'] = userData['Details'][1] == null ? null: userData['Details'][1];
@@ -379,7 +478,8 @@ class _tabs_P extends State<tabBar_P> {
     temp['qualification'] = temp['qualification'] == null ? null: temp['qualification'];
     temp['stream'] = temp['stream'] == null ? null: temp['stream'];
     temp['experience'] = temp['experience'] == null ? null : temp['experience'];
-*/
+*//*
+
 
 //    print(userData['Details']['qualification']);
 ////    print(userData['Details']['stream']);
@@ -477,7 +577,7 @@ class _tabs_P extends State<tabBar_P> {
               color: Colors.lightBlue[50],
               child: Center(
                 child: ListTile(
-                    title: Text("Looking for ${temp['choice']}")
+                    title: Text("I'm Looking for ${temp['choice']}")
                 ),
               ),
             ),
@@ -649,4 +749,4 @@ class _tabs_P extends State<tabBar_P> {
               ));
 //    }
   }
-}
+}*/

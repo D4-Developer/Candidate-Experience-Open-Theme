@@ -84,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       subtitle: Text("${widget.profileData['CompanyAddress']}"),
                       trailing: widget.isEditable ? Icon(Icons.edit) : null,
                     ),
-                    if(!widget.isManager)
+                    if(!widget.isManager && widget.isEditable)
                       CandidateThings(widget.profileData),
                     if(widget.series != null)
                       graphicalR(widget.series), /// graphical of userResult && averageResult....
@@ -107,7 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
-                    Center(
+                    widget.isEditable ? Center(
                       child: RaisedButton(
                         color: Colors.redAccent,
                         shape: StadiumBorder(),
@@ -145,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-                    ),
+                    ) : Container(),
                   ]),
                 ),
               ],
@@ -179,7 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget educationPage() {
-    print(widget.profileData['Details']['education']);
+    print(widget.profileData['Details']);
     return Card(
       color: Colors.blue[600],
       shape: OutlineInputBorder(
@@ -194,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
             trailing: widget.isEditable ? Icon(Icons.edit) : null,
           ),
           ListTile(
-            subtitle: Text('${widget.profileData['Details']['experience']}'),
+//            subtitle: Text('${widget.profileData['Details']['experience']}'),
             title: widget.profileData['Details']['education'] == null ? null :
             Text('${widget.profileData['Details']['education']}'),
           )
@@ -245,7 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ListTile(
             leading: Icon(Icons.assessment),
             contentPadding: EdgeInsets.fromLTRB(width/15, 0,width/15,0),
-            title: Text('Analysis of ${widget.profileData['DisplayName']}',
+            title: Text("Analysis of ${widget.profileData['DisplayName']}'s Aptitude test",
               style: TextStyle(
                 color: Colors.blue[900],
 //                  fontSize: 18
@@ -588,6 +588,30 @@ class _CandidateThingsState extends State<CandidateThings> {
   final List<String> experience = <String> ['No Experience Needed', '6 Month', '1 Year', '2 Year', 'More than 2 Years', 'Any'];
   String added = 'null';
 
+  @override
+  void initState(){
+    super.initState();
+    if(widget.userData['Details']!=null){
+//      print("in Not Equals to null");
+      temp['job'] = widget.userData['Details']['job'];
+      temp['qualification'] = widget.userData['Details']['qualification'];
+      temp['experience'] = widget.userData['Details']['experience'];
+//      print("printing = ${temp['qualification']}");
+    }
+    temp['choice'] = temp['choice'] == null ? null : temp['choice'];
+    temp['qualification'] = temp['qualification'] == null ? null: temp['qualification'];
+    temp['experience'] = temp['experience'] == null ? null : temp['experience'];
+    temp['TechnicalSkills'] = widget.userData['TechnicalSkills'] == null ? null : widget.userData['TechnicalSkills'];
+    getSkillsTypes(temp['job']);
+    print(widget.userData['TechnicalSkills']);
+//    widget.skillTypes= [];
+//    widget.skillsNeeded = temp['SkillsNeeded'];
+    widget.skillBox = List(widget.skillTypes.length);
+    widget.skillBox = widget.skillBox.expand((i)=> [false]).toList();
+//    setState((){ temp['job'] = selection; });
+
+  }
+
   void getSkillsTypes(String match) {
     widget.skillTypes.clear();
     widget.skillTypes = List.from(widget.skillTypes)
@@ -610,7 +634,7 @@ class _CandidateThingsState extends State<CandidateThings> {
           children: <Widget>[
             ListTile(
               contentPadding: EdgeInsets.all(10),
-              title: Text('Looking for : ${temp['job']}', textScaleFactor: .95, textAlign: TextAlign.center),
+              title: Text('Looking for job as a: ${temp['job']}', textScaleFactor: .95, textAlign: TextAlign.center),
             ),
             DropdownButton <String> (
               value: temp['job'],
@@ -677,7 +701,7 @@ class _CandidateThingsState extends State<CandidateThings> {
               isExpanded: true,
             ),
             ExpansionTile(
-              title: Text('Techincal Skills Needed : $added',textScaleFactor: 1),
+              title: Text('Technical Skills I have : $added',textScaleFactor: 1),
               children: <Widget>[
                 SizedBox(
                     height: height/expansion,

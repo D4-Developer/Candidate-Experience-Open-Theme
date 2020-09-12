@@ -107,34 +107,36 @@ class _list extends State<AptitudeTest> {
     super.initState();
     startTimeout();
   }
-  startTimeout() {
-    return new Timer.periodic(timeout, (Timer T){
+  startTimeout({bool isStopped = false}) {
+    return Timer.periodic(timeout, (Timer T){
       setState(() {
         if(minute == 0 && seconds == 0){
           T.cancel();
           progressIndicator(false);
-          showDialog(context: context, barrierDismissible: false,
-              builder: (context) =>
-              AlertDialog(
-                title: Text('Time over'),
-                actions: <Widget>[
-                  RaisedButton(
-                    color: Colors.blue[900],
-                    child: Text('SHOW ME ANALYSIS'),
-                    onPressed: () {
+          if(!isStopped){
+            showDialog(context: context, barrierDismissible: false,
+                builder: (context) =>
+                    AlertDialog(
+                      title: Text('Time over'),
+                      actions: <Widget>[
+                        RaisedButton(
+                            color: Colors.blue[900],
+                            child: Text('SHOW ME ANALYSIS'),
+                            onPressed: () {
 //                      print(isLoaded);
-                      if(isLoaded){
-                        Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(builder: (_) =>
-                          pieCharts(series, userData['TestResult'].toDouble(), true)));
-                        }
-                      else
-                        progressIndicator(true);
-                    }
-                  )
-                ],
-              )
-          );
+                              if(isLoaded){
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (_) =>
+                                    pieCharts(series, userData['TestResult'].toDouble(), true)));
+                              }
+                              else
+                                progressIndicator(true);
+                            }
+                        )
+                      ],
+                    )
+            );
+          }
         }
         else if(seconds != 0)
           --seconds;
@@ -155,8 +157,7 @@ class _list extends State<AptitudeTest> {
       onWillPop: () async => false,
       child: Scaffold(
         appBar: AppBar(
-          title: Text("APTITUTE TEST PAGE"),
-          
+          title: Text("APTITUDE TEST PAGE"),
           automaticallyImplyLeading: false,
           backgroundColor: Colors.blue[900],
           actions: <Widget>[
@@ -268,6 +269,7 @@ class _list extends State<AptitudeTest> {
 //                        print("pressed Submit");
                                 Navigator.of(context, rootNavigator: true).pop();
                                 progressIndicator(true);
+//                                startTimeout();
                               },
                             ),
                           ]
@@ -282,10 +284,10 @@ class _list extends State<AptitudeTest> {
 
   Future<void> progressIndicator(bool isRedirect) async {
     if(isRedirect)
-      loadingAnimation(context, '');
+      loadingAnimation(context, 'getting result....');
     int result = 0;
 
-    for (int i = 0; i < 35; i++)
+    for (int i = 0; i < 25; i++)
       if (grVal[i] != answers[i])
         result++;
 //    print("Wrong Answer Count = $result");
@@ -293,18 +295,20 @@ class _list extends State<AptitudeTest> {
 //    DocumentReference dr = Firestore.instance.collection('appData').document('TestResult');
     var data = {
       'isGivenTest': true,
-      'TestResult': 35 - result,
+      'TestResult': 25 - result,
     };
     Future.delayed(const Duration(seconds: 1), () async {
-      await Firestore.instance.collection('normalUser').document(
+      await Firestore.instance.collection('candidates').document(
           userData['UID']).updateData(data);
 //      print("Test Result  Updated");
-      userData['TestResult'] = 25 - result;
-
-      DocumentReference dr = userData['appData'];
+      var mark = (25 - result) >=0 ? 25 - result : 0;
+      userData['TestResult'] = mark;
+      userData['isGivenTest'] = true;
+      DocumentReference dr = Firestore.instance.collection('appData')
+          .document('TestResult');
       dr.get().then((DocumentSnapshot ds) async {
 //        print(ds['Total']);
-        total = ds['Total'] + 25 - result;
+        total = ds['Total'] + mark;
         users = ds['TotalUser'] + 1;
         var update = {
           'Total': total,
@@ -332,8 +336,11 @@ class _list extends State<AptitudeTest> {
           Navigator.push(context, MaterialPageRoute(builder: (_) =>
             pieCharts(series, userData['TestResult'].toDouble(), true) ));
         } // if
-        setState(() => isLoaded = true);
+        startTimeout(isStopped: true);
+//        minute = 0;
+//        seconds = 0;
 //        print(isLoaded);
+//        setState(() => isLoaded = true);
       });
     });
   }// progressIndicator

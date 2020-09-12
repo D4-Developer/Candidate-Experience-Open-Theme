@@ -166,7 +166,7 @@ class signUpState extends State<signUp> {
       FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
               email: list[3], password: list[4])).user;
       if (user != null) {
-
+        user.sendEmailVerification();
 //        UserUpdateInfo updateUser = UserUpdateInfo();
 //        updateUser.displayName = name;
 //        await user.updateProfile(updateUser);
@@ -244,6 +244,7 @@ class signUpState extends State<signUp> {
             'Gender': gender,
             'UserType': "Candidate",
             'isAccActivated': true,
+            'isGivenPersonality': -1,
             'isGivenTest': false,
             'isStarted': false,
             'DetailsAdded': true,
@@ -254,6 +255,7 @@ class signUpState extends State<signUp> {
             'RegistrationTime': DateTime.now()
           };
           await collectionReference.document(user.uid).setData(newUserDetail);
+
           await _auth.signOut();
           print("Candidate SignUp");
 //          print(name);

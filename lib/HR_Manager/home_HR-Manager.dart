@@ -38,8 +38,8 @@ class MyStatefulWidgetState extends State<MyState> {
 
   int _selectedIndex = 0;
   static  List<Widget> _widgetOptions = <Widget>[
-    ResumeRank(userData),
     homePage(),
+    ResumeRank(userData),
     ResumeRanking(),
     analysis(),
     ProfilePage(userData, true, true),
@@ -88,12 +88,12 @@ class MyStatefulWidgetState extends State<MyState> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.star),
-            title: Text('ResumeRanking',style: TextStyle(fontSize: 15)),
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.home),
             title: Text('Home',style: TextStyle(fontSize: 15)),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.star),
+            title: Text('ResumeRanking',style: TextStyle(fontSize: 15)),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
@@ -243,8 +243,7 @@ class _homePageState extends State<homePage> {
     }
     else {
       print('1');
-          streamQuery = Firestore.instance.collection('candidates'
-              '')
+          streamQuery = Firestore.instance.collection('candidates''')
           /// watch the whereIn clause:
               .where('Details.job', isEqualTo: '${userData['Details']['job']}')
               .where('Details.experience', isEqualTo: '${userData['Details']['experience']}')
@@ -296,7 +295,8 @@ class _homePageState extends State<homePage> {
 
                                     if(documents.elementAt(index)['isGivenTest']) {
                                       loadingAnimation(context, "Getting UserProfile...");
-                                      DocumentReference ds = userData['appData'];
+                                      DocumentReference ds = Firestore.instance
+                                          .collection('appData').document('TestResult');
                                       await ds.get().then((DocumentSnapshot DS) async {
                                         var average = DS['Total'] / DS['TotalUser'];
                                         print(" total average = $average");
@@ -369,7 +369,7 @@ class _analysisState extends State<analysis> {
 
   void analysisNeed() async{
 
-    DocumentReference ds = userData['appData'];
+    DocumentReference ds = Firestore.instance.collection('appData').document('TestResult');
     await ds.get().then((DocumentSnapshot DS) async{
 
       var average = DS['Total']/DS['TotalUser'];

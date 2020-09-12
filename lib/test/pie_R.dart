@@ -84,6 +84,9 @@ class pie_R extends State<pieCharts> {
             if(widget.isRedirect) {
               Navigator.pop(context);
               Navigator.pop(context);
+              setState(() {
+
+              });
             }
             else
               Navigator.pop(context);

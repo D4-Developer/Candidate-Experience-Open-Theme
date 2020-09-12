@@ -17,8 +17,8 @@ class ResumeRank extends StatefulWidget {
 
 class _ResumeRankState extends State<ResumeRank> {
   List values = [10,9,8,7,6,5];
-  final streamQuery = Firestore.instance.collection('candidates')
-      .where('Details.job', isEqualTo: '${userData['Details']['job']}');
+  final streamQuery = Firestore.instance.collection('candidates');
+//      .where('Details.job', isEqualTo: '${userData['Details']['job']}');
 //        .where('TechnicalSkills.skills', isEqualTo: userData['TechnicalSkills']);
   void getSkillsTypes(String match) {
     widget.skillTypes.clear();
@@ -31,7 +31,7 @@ class _ResumeRankState extends State<ResumeRank> {
   }
 
   void getRanking(List <DocumentSnapshot> documents) async{
-    print('in ');
+
     for(int i =0 ; i< documents.length; i++){
       getSkillsTypes(documents.elementAt(0).data['Details']['job']);
       var userS = documents.elementAt(i).data['TechnicalSkills'].length;
@@ -39,7 +39,7 @@ class _ResumeRankState extends State<ResumeRank> {
       var skillsR = userS/totalS * 10;
 
       var userA = documents.elementAt(i).data['isGivenTest'] ? documents.elementAt(i).data['TestResult'] / 2.5 : 0;
-      var userP = documents.elementAt(i).data['isGivenPersonality'] ? documents.elementAt(i).data['PersonalityR'] / 15 : 0;
+      var userP = documents.elementAt(i).data['isGivenPersonality'] == 1 ? documents.elementAt(i).data['PersonalityR'] / 15 : 0;
       var userPro = documents.elementAt(i).data['Projects'].length;
       if(userPro == 1)
         userPro = 7;
@@ -75,7 +75,7 @@ class _ResumeRankState extends State<ResumeRank> {
         appBar: AppBar(
           backgroundColor: Colors.blue[900],
           automaticallyImplyLeading: false,
-          title: Text("Explore"),
+          title: Text("All Candidates Ranking"),
           actions: <Widget>[
             RaisedButton(
               color: Colors.blue[900],
@@ -258,10 +258,9 @@ class _ResumeRankState extends State<ResumeRank> {
   }
 
   Widget getStreams() {
-    return StreamBuilder<QuerySnapshot>(
-        stream: streamQuery.snapshots(),
+    return FutureBuilder<QuerySnapshot>(
+        future: streamQuery.getDocuments(),
         builder: (BuildContext context,AsyncSnapshot<QuerySnapshot> snapshot) {
-          print('build');
           print(snapshot.hasData);
           if (snapshot.hasError) return Text('${snapshot.error}');
           switch (snapshot.connectionState) {
@@ -279,7 +278,6 @@ class _ResumeRankState extends State<ResumeRank> {
 //            .orderBy('TestResult', descending: true)
                           .snapshots(),
                       builder: (BuildContext context,AsyncSnapshot<QuerySnapshot> snapshot) {
-                        print('build');
                         print(snapshot.hasData);
 
                         if (snapshot.hasError) return Text('${snapshot.error}');

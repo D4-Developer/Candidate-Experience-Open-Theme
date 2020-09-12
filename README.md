@@ -1,4 +1,4 @@
-# hrm
+# Recruit-a-thon
 
 A new Flutter application.
 
