@@ -1,17 +1,28 @@
 # Recruit-a-thon
 
-A new Flutter application.
+CandidateOpenTheme App : The simple app for recruitment based on the Resume Ranking Policy.
 
-## Getting Started
+* About
+    * Separate and secure login of manager and candidates.
+    * App does selection & analysis of candidates through various test like common aptitude and personality tests.
+    * Candidates can give online aptitude and personality test.
+    * a company can checkout candidates profile and contact details.
 
-This project is a starting point for a Flutter application.
+    * Manage profile
+    * Job specific Shortlisting of candidates
+    * Online Aptitude & Personality test
+    * Aptitude test Result in graphical manner 
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-#hrm
+1. Manager Flow:
+
+
+          ![Manager Flow](https://drive.google.com/file/d/1K5jV0eCd8V5aKrSzA-KORTwMoZB0SzhR)
+
+
+2. Candidate Flow:
+
+
+          ![Candidate Flow](https://drive.google.com/file/d/1d5EOuJ60bJrpxjpP1C5-OqpTSPELj_T4)
+
